@@ -4,16 +4,17 @@
  *  Created on: Jun 20, 2014
  *      Author: hiep
  */
-
-#include "lib/adlist.h"
-#include "lib/ae.h"
-#include "lib/anet.h"
-#include "lib/sds.h"
+#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <errno.h>
+#include "lib/ae.h"
+#include "lib/adlist.h"
+#include "lib/anet.h"
+#include "lib/sds.h"
+
 
 #define TEST_MAX_CLIENT 10000
 
@@ -81,6 +82,7 @@ void acceptTcpHandler(aeEventLoop* el, int fd, void* privData, int mask) {
 int main(int argc, char **argv) {
 	server.maxclients = TEST_MAX_CLIENT;
 	server.el = aeCreateEventLoop(server.maxclients + 32+96);
+	strcpy(server.bindaddr, "127.0.0.1");
 	server.port = 8888;
 	server.tcpkeepalive = 0;
 	server.clients = listCreate();
@@ -89,7 +91,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Creating Server TCP listening socket %s:%d\t%s", server.bindaddr ? server.bindaddr : "*", server.port, server.neterr);
 		exit(EXIT_FAILURE);
 	}
-	if (aeCreateFileEvent(server.el, server.sfd, AE_READABLE, acceptTcpHandler, NULL, AE_ERR)) {
+	if (aeCreateFileEvent(server.el, server.sfd, AE_READABLE, acceptTcpHandler, NULL)) {
 		fprintf(stderr, "Unrecoverable error creating %d file event", server.sfd);
 		exit(EXIT_FAILURE);
 	}
